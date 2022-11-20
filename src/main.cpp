@@ -1,31 +1,37 @@
-#include <thread>
 #include <Windows.h>
+#include <iostream>
+#include <thread>
+#include "hooks.hpp"
+// take this serious you need to learn 
 
-void attach(HINSTANCE instance) {
-	Beep(100, 100);
+void Attach(HINSTANCE instance)
+{
+	AllocConsole();
+	freopen_s((FILE**)stdout, "CONOUT$", "w", stdout);
+	Hooks::Initialize();
 
-	while (!GetAsyncKeyState(VK_RSHIFT))
-		std::this_thread::sleep_for(std::chrono::milliseconds(50));
+	while (!GetAsyncKeyState(VK_DELETE))
+		std::this_thread::sleep_for(std::chrono::milliseconds(100));
 
 	FreeLibrary(instance);
 }
 
-void detach() {
-	Beep(500, 100);
-
-	Sleep(100);
-}
-
-bool __stdcall DllMain(HINSTANCE instance, uint32_t reason, void* _) {
-	if (reason == DLL_PROCESS_ATTACH) {
-		DisableThreadLibraryCalls(instance);
-
-		std::thread attach_thread(attach, instance);
-		attach_thread.detach();
+bool __stdcall DllMain(HINSTANCE instance, uint32_t reason, void* _)
+{
+	if (reason == DLL_PROCESS_ATTACH)
+	{
+		std::thread attachThread(Attach, instance);
+		attachThread.detach();
 	}
 
-	// Only called if using load library to inject
-	else detach();
+	else
+	{
+		Hooks::Release();
+		fclose((FILE*)stdout);
+		FreeConsole();
+
+		Sleep(100);
+	}
 
 	return true;
 }
