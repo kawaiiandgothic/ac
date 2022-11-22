@@ -6,9 +6,8 @@
 void Renderer::Line(int x1, int y1, int x2, int y2)
 {
 	glBegin(GL_LINES);
-	glVertex2i(1, 400);
-	glVertex2i(1000, 400);
-	glVertex2i(1, 400);
-	glVertex2i(1000, 400);
+	glColor3f(1.0, 1.0, 1.0);
+	glVertex2i(x1, y1);
+	glVertex2i(x2, y2);
 	glEnd();
 }

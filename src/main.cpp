@@ -10,7 +10,7 @@ void Attach(HINSTANCE instance)
 	freopen_s((FILE**)stdout, "CONOUT$", "w", stdout);
 	Hooks::Initialize();
 
-	while (!GetAsyncKeyState(VK_DELETE))
+	while (!GetAsyncKeyState(VK_RSHIFT))
 		std::this_thread::sleep_for(std::chrono::milliseconds(100));
 
 	FreeLibrary(instance);
