@@ -2,7 +2,6 @@
 #include <iostream>
 #include <thread>
 #include "hooks.hpp"
-// take this serious you need to learn 
 
 void Attach(HINSTANCE instance)
 {
@@ -10,7 +9,7 @@ void Attach(HINSTANCE instance)
 	freopen_s((FILE**)stdout, "CONOUT$", "w", stdout);
 	Hooks::Initialize();
 
-	while (!GetAsyncKeyState(VK_RSHIFT))
+	while (!GetAsyncKeyState(VK_F5))
 		std::this_thread::sleep_for(std::chrono::milliseconds(100));
 
 	FreeLibrary(instance);
@@ -24,7 +23,7 @@ bool __stdcall DllMain(HINSTANCE instance, uint32_t reason, void* _)
 		attachThread.detach();
 	}
 
-	else
+	if (reason == DLL_PROCESS_DETACH)
 	{
 		Hooks::Release();
 		fclose((FILE*)stdout);

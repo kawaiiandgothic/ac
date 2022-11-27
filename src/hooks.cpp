@@ -47,22 +47,23 @@ BOOL __stdcall Hooks::SwapBuffers::Hook(HDC hdc)
     float matrix[16];
     uintptr_t BaseAddr = (uintptr_t)GetModuleHandleA("ac_client.exe");
     uintptr_t EntList = *(uintptr_t*)(BaseAddr + 0x10F4F8);
+    auto players_in_game = *(uintptr_t*)(BaseAddr + 0x10F500);
 
     memcpy(&matrix, (PBYTE*)(0x501AE8), sizeof(matrix));
 
-    for (int i = 1; i != 12; i++) {
+    for (int i = 1; i < players_in_game; i++) {
         Ent* Entity = *(Ent**)(EntList + (i * 0x4));
         if (!Entity) { continue; }
-        std::cout << Entity->Health << std::endl;
         
-        if (Entity->Health > 0) {
+        if (Entity->Health > 0 || Entity->Health >= 100) {
             Vec2 Pos2D, Head2D;
             WorldToScreen(Entity->PlayerPos, Pos2D, matrix, WindowSize);
             WorldToScreen(Entity->HeadPos, Head2D, matrix, WindowSize);
+            //Renderer::Line(Pos2D.x - 50, Pos2D.y - 50, Head2D.x - 50, Head2D.y - 50);
             Renderer::Line(WindowSize.x / 2, WindowSize.y, Pos2D.x, Pos2D.y);
         }
     }
-
+    
     return orig(hdc);
 }
 
