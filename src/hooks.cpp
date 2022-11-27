@@ -1,12 +1,9 @@
-#include "hooks.hpp"
 #include <iostream>
+#include "hooks.hpp"
 #include "../minhook/MinHook.h"
 #include "renderer.hpp"
-Hooks::SwapBuffers::fn orig = nullptr;
 
-struct Vec2 { float x, y; };
-struct Vec3 { float x, y, z; };
-struct Vec4 { float x, y, z, w; };
+Hooks::SwapBuffers::fn orig = nullptr;
 
 class Ent
 {
@@ -39,14 +36,16 @@ bool WorldToScreen(Vec3 pos, Vec2& screen, float matrix[16], Vec2 WindowSize) {
     screen.y = -(WindowSize.y / 2 * NDC.y) + (NDC.y + WindowSize.y / 2);
     return true;
 }
+auto color = rgb::green;
 
 BOOL __stdcall Hooks::SwapBuffers::Hook(HDC hdc)
 {
     Vec2 WindowSize = { 1024,768 };
-
+    
     float matrix[16];
     uintptr_t BaseAddr = (uintptr_t)GetModuleHandleA("ac_client.exe");
     uintptr_t EntList = *(uintptr_t*)(BaseAddr + 0x10F4F8);
+    Ent* localPlayer = *(Ent**)(BaseAddr + 0x10F4F4);
     auto players_in_game = *(uintptr_t*)(BaseAddr + 0x10F500);
 
     memcpy(&matrix, (PBYTE*)(0x501AE8), sizeof(matrix));
@@ -59,11 +58,17 @@ BOOL __stdcall Hooks::SwapBuffers::Hook(HDC hdc)
             Vec2 Pos2D, Head2D;
             WorldToScreen(Entity->PlayerPos, Pos2D, matrix, WindowSize);
             WorldToScreen(Entity->HeadPos, Head2D, matrix, WindowSize);
+
+            float dist = localPlayer->PlayerPos.Distance(Entity->PlayerPos);
+
+            //float scale = (GAME_UNIT_MAGIC / dist) * (viewport[2] / VIRTUAL_SCREEN_WIDTH);
+            Renderer::Box(Pos2D.x, Pos2D.y, 25, 50, 2.0f, color);
+
             //Renderer::Line(Pos2D.x - 50, Pos2D.y - 50, Head2D.x - 50, Head2D.y - 50);
-            Renderer::Line(WindowSize.x / 2, WindowSize.y, Pos2D.x, Pos2D.y);
+            //Renderer::Line(WindowSize.x / 2, WindowSize.y, Pos2D.x, Pos2D.y);
         }
     }
-    
+   
     return orig(hdc);
 }
 
