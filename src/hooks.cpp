@@ -16,6 +16,14 @@ public:
     int32_t Health; //0x00F8
 }; //Size: 0x018C
 
+// Copied these values and this ESP scaling method from a tutorial on GuidedHacking (https://www.youtube.com/watch?v=kGDKQXgxIrY&t=1125s)
+// they are used for scaling an ESP box
+#define VIRTUAL_SCREEN_WIDTH 800
+#define GAME_UNIT_MAGIC 400
+#define PLAYER_HEIGHT 7.25
+#define PLAYER_WIDTH 3.5
+#define PLAYER_ASPECT_RATIO PLAYER_HEIGHT / PLAYER_WIDTH;
+
 bool WorldToScreen(Vec3 pos, Vec2& screen, float matrix[16], Vec2 WindowSize) {
     Vec4 clipCoords;
     clipCoords.x = pos.x * matrix[0] + pos.y * matrix[4] + pos.z * matrix[8] + matrix[12];
@@ -62,7 +70,12 @@ BOOL __stdcall Hooks::SwapBuffers::Hook(HDC hdc)
             float dist = localPlayer->PlayerPos.Distance(Entity->PlayerPos);
 
             //float scale = (GAME_UNIT_MAGIC / dist) * (viewport[2] / VIRTUAL_SCREEN_WIDTH);
+
             Renderer::Box(Pos2D.x, Pos2D.y, 25, 50, 2.0f, color);
+            // need idk
+            auto left = Pos2D.x = PLAYER_WIDTH;
+            auto right = Pos2D.y = PLAYER_HEIGHT;
+            Renderer::Box(Pos2D.x, right, Pos2D.y, left, 2.0f, color);
 
             //Renderer::Line(Pos2D.x - 50, Pos2D.y - 50, Head2D.x - 50, Head2D.y - 50);
             //Renderer::Line(WindowSize.x / 2, WindowSize.y, Pos2D.x, Pos2D.y);
